@@ -1,0 +1,14 @@
+[
+  {
+    "model": "dynamic_basis_depthwise",
+    "run": 1,
+    "seed": 42,
+    "run_name": "dynamic_basis_depthwise_run_01",
+    "best_val_accuracy": 0.5468000173568726,
+    "best_val_loss": NaN,
+    "final_val_accuracy": 0.5458999872207642,
+    "final_val_loss": NaN,
+    "evaluation_accuracy": 0.5458999872207642,
+    "evaluation_loss": NaN
+  }
+]
