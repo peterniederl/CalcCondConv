@@ -11,31 +11,31 @@ _________________________________________________________________
                                                                  
  activation (Activation)     (None, 32, 32, 64)        0         
                                                                  
- residual_block (ResidualBl  (None, 32, 32, 64)        45888     
+ residual_block (ResidualBl  (None, 32, 32, 64)        28976     
  ock)                                                            
                                                                  
- residual_block_1 (Residual  (None, 32, 32, 64)        45888     
+ residual_block_1 (Residual  (None, 32, 32, 64)        28976     
  Block)                                                          
                                                                  
- residual_block_2 (Residual  (None, 16, 16, 128)       124752    
+ residual_block_2 (Residual  (None, 16, 16, 128)       82752     
  Block)                                                          
                                                                  
- residual_block_3 (Residual  (None, 16, 16, 128)       177504    
+ residual_block_3 (Residual  (None, 16, 16, 128)       110416    
  Block)                                                          
                                                                  
- residual_block_4 (Residual  (None, 16, 16, 128)       177504    
+ residual_block_4 (Residual  (None, 16, 16, 128)       110416    
  Block)                                                          
                                                                  
- residual_block_5 (Residual  (None, 8, 8, 256)         488832    
+ residual_block_5 (Residual  (None, 8, 8, 256)         322416    
  Block)                                                          
                                                                  
- residual_block_6 (Residual  (None, 8, 8, 256)         698784    
+ residual_block_6 (Residual  (None, 8, 8, 256)         433040    
  Block)                                                          
                                                                  
- residual_block_7 (Residual  (None, 8, 8, 256)         698784    
+ residual_block_7 (Residual  (None, 8, 8, 256)         433040    
  Block)                                                          
                                                                  
- residual_block_8 (Residual  (None, 8, 8, 256)         698784    
+ residual_block_8 (Residual  (None, 8, 8, 256)         433040    
  Block)                                                          
                                                                  
  global_average_pooling2d (  (None, 256)               0         
@@ -46,7 +46,7 @@ _________________________________________________________________
  dense (Dense)               (None, 200)               51400     
                                                                  
 =================================================================
-Total params: 3213176 (12.26 MB)
-Trainable params: 3206136 (12.23 MB)
+Total params: 2039528 (7.78 MB)
+Trainable params: 2032488 (7.75 MB)
 Non-trainable params: 7040 (27.50 KB)
 _________________________________________________________________

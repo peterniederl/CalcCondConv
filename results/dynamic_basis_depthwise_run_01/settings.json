@@ -22,10 +22,12 @@
   "mixup_alpha": 0.2,
   "mixup_probability": 0.5,
   "model": {
+    "coefficient_rank": 8,
     "conv_type": "dynamic_basis_depthwise",
     "dropout_rate": 0.3,
     "groups": 2,
-    "num_bases": 16,
+    "kernel_size": 7,
+    "num_bases": 8,
     "reduction": 4,
     "stage_channels": [
       64,

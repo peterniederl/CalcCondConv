@@ -200,12 +200,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 64,
           "groups": 2,
           "name": "residual_block",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -235,12 +236,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 64,
           "groups": 2,
           "name": "residual_block_1",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -270,12 +272,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 128,
           "groups": 2,
           "name": "residual_block_2",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 2,
           "trainable": true
@@ -305,12 +308,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 128,
           "groups": 2,
           "name": "residual_block_3",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -340,12 +344,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 128,
           "groups": 2,
           "name": "residual_block_4",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -375,12 +380,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 256,
           "groups": 2,
           "name": "residual_block_5",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 2,
           "trainable": true
@@ -410,12 +416,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 256,
           "groups": 2,
           "name": "residual_block_6",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -445,12 +452,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 256,
           "groups": 2,
           "name": "residual_block_7",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true
@@ -480,12 +488,13 @@
         },
         "class_name": "ResidualBlock",
         "config": {
+          "coefficient_rank": 8,
           "conv_type": "dynamic_depthwise",
           "dtype": "float32",
           "filters": 256,
           "groups": 2,
           "name": "residual_block_8",
-          "num_bases": 16,
+          "num_bases": 32,
           "reduction": 4,
           "stride": 1,
           "trainable": true

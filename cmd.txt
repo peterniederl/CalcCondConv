@@ -1,0 +1,22 @@
+python3 compare_histories.py \
+  baseline_run_01 \
+  baseline_run_02 \
+  dynamic_basis_depthwise_run_01 \
+  --metric val_accuracy \
+  --output results/history_comparison.png
+
+
+python3 compare_histories.py \
+  baseline_run_01 \
+  baseline_run_02 \
+  dynamic_basis_depthwise_run_00 \
+  dynamic_basis_depthwise_low_rank_run_01 \
+  dynamic_depthwise_run_01 \
+  basis_conv_run_01 \
+  dynamic_mixer_run_01 \
+  --metric val_accuracy \
+  --output results/history_comparison.png
+
+  python3 run_experiments.py \
+  --models basis_conv \
+  --runs basis_conv=1 
