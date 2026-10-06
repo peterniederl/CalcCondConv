@@ -1,14 +1,14 @@
 [
   {
     "model": "standard",
-    "run": 1,
-    "seed": 42,
-    "run_name": "standard_run_01",
-    "best_val_accuracy": 0.6036999821662903,
-    "best_val_loss": 1.7510799169540405,
-    "final_val_accuracy": 0.6029999852180481,
-    "final_val_loss": 1.7401973009109497,
-    "evaluation_accuracy": 0.6029999852180481,
-    "evaluation_loss": 1.7401973009109497
+    "run": 2,
+    "seed": 43,
+    "run_name": "standard_run_02",
+    "best_val_accuracy": 0.6057000160217285,
+    "best_val_loss": 1.794205904006958,
+    "final_val_accuracy": 0.6049000024795532,
+    "final_val_loss": 1.7915050983428955,
+    "evaluation_accuracy": 0.6049000024795532,
+    "evaluation_loss": 1.7915050983428955
   }
 ]
