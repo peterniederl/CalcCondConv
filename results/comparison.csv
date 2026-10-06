@@ -1,2 +1,2 @@
 model,run,seed,run_name,best_val_accuracy,best_val_loss,final_val_accuracy,final_val_loss,evaluation_accuracy,evaluation_loss
-dynamic_basis_depthwise,1,42,dynamic_basis_depthwise_run_01,0.5468000173568726,nan,0.5458999872207642,nan,0.5458999872207642,nan
+standard,1,42,standard_run_01,0.6036999821662903,1.7510799169540405,0.6029999852180481,1.7401973009109497,0.6029999852180481,1.7401973009109497

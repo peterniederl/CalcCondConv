@@ -1,14 +1,14 @@
 [
   {
-    "model": "dynamic_basis_depthwise",
+    "model": "standard",
     "run": 1,
     "seed": 42,
-    "run_name": "dynamic_basis_depthwise_run_01",
-    "best_val_accuracy": 0.5468000173568726,
-    "best_val_loss": NaN,
-    "final_val_accuracy": 0.5458999872207642,
-    "final_val_loss": NaN,
-    "evaluation_accuracy": 0.5458999872207642,
-    "evaluation_loss": NaN
+    "run_name": "standard_run_01",
+    "best_val_accuracy": 0.6036999821662903,
+    "best_val_loss": 1.7510799169540405,
+    "final_val_accuracy": 0.6029999852180481,
+    "final_val_loss": 1.7401973009109497,
+    "evaluation_accuracy": 0.6029999852180481,
+    "evaluation_loss": 1.7401973009109497
   }
 ]
