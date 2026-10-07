@@ -11,31 +11,43 @@ _________________________________________________________________
                                                                  
  activation (Activation)     (None, 32, 32, 64)        0         
                                                                  
- residual_block (ResidualBl  (None, 32, 32, 64)        82946     
+ residual_block (ResidualBl  (None, 32, 32, 64)        74240     
  ock)                                                            
                                                                  
- residual_block_1 (Residual  (None, 32, 32, 64)        82946     
+ axial_context_block (Axial  (None, 32, 32, 64)        35265     
+ ContextBlock)                                                   
+                                                                 
+ residual_block_1 (Residual  (None, 32, 32, 64)        74240     
  Block)                                                          
                                                                  
- residual_block_2 (Residual  (None, 16, 16, 128)       239874    
+ residual_block_2 (Residual  (None, 16, 16, 128)       230912    
  Block)                                                          
                                                                  
- residual_block_3 (Residual  (None, 16, 16, 128)       305154    
+ axial_context_block_1 (Axi  (None, 16, 16, 128)       74625     
+ alContextBlock)                                                 
+                                                                 
+ residual_block_3 (Residual  (None, 16, 16, 128)       295936    
  Block)                                                          
                                                                  
- residual_block_4 (Residual  (None, 16, 16, 128)       305154    
+ residual_block_4 (Residual  (None, 16, 16, 128)       295936    
  Block)                                                          
                                                                  
- residual_block_5 (Residual  (None, 8, 8, 256)         930306    
+ residual_block_5 (Residual  (None, 8, 8, 256)         920576    
  Block)                                                          
                                                                  
- residual_block_6 (Residual  (None, 8, 8, 256)         1191938   
+ axial_context_block_2 (Axi  (None, 8, 8, 256)         165633    
+ alContextBlock)                                                 
+                                                                 
+ residual_block_6 (Residual  (None, 8, 8, 256)         1181696   
  Block)                                                          
                                                                  
- residual_block_7 (Residual  (None, 8, 8, 256)         1191938   
+ residual_block_7 (Residual  (None, 8, 8, 256)         1181696   
  Block)                                                          
                                                                  
- residual_block_8 (Residual  (None, 8, 8, 256)         1191938   
+ axial_context_block_3 (Axi  (None, 8, 8, 256)         165633    
+ alContextBlock)                                                 
+                                                                 
+ residual_block_8 (Residual  (None, 8, 8, 256)         1181696   
  Block)                                                          
                                                                  
  global_average_pooling2d (  (None, 256)               0         
@@ -46,7 +58,7 @@ _________________________________________________________________
  dense (Dense)               (None, 200)               51400     
                                                                  
 =================================================================
-Total params: 5578650 (21.28 MB)
-Trainable params: 5571610 (21.25 MB)
-Non-trainable params: 7040 (27.50 KB)
+Total params: 5934540 (22.64 MB)
+Trainable params: 5925036 (22.60 MB)
+Non-trainable params: 9504 (37.12 KB)
 _________________________________________________________________

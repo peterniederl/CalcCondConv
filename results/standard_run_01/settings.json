@@ -22,7 +22,7 @@
   "mixup_alpha": 0.2,
   "mixup_probability": 0.5,
   "model": {
-    "axial_position": "both",
+    "axial_position": "none",
     "axial_reduction": 1,
     "axial_use_pointwise": false,
     "axial_use_tanh": false,
