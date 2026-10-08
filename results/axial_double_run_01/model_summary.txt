@@ -1,0 +1,67 @@
+Model: "resnet_axial_double"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 64, 64, 3)]       0         
+                                                                 
+ conv2d (Conv2D)             (None, 32, 32, 64)        4800      
+                                                                 
+ batch_normalization (Batch  (None, 32, 32, 64)        256       
+ Normalization)                                                  
+                                                                 
+ activation (Activation)     (None, 32, 32, 64)        0         
+                                                                 
+ residual_block (ResidualBl  (None, 32, 32, 64)        74240     
+ ock)                                                            
+                                                                 
+ double_axial_context_block  (None, 32, 32, 64)        35265     
+  (DoubleAxialContextBlock)                                      
+                                                                 
+ residual_block_1 (Residual  (None, 32, 32, 64)        74240     
+ Block)                                                          
+                                                                 
+ residual_block_2 (Residual  (None, 16, 16, 128)       230912    
+ Block)                                                          
+                                                                 
+ double_axial_context_block  (None, 16, 16, 128)       74625     
+ _1 (DoubleAxialContextBloc                                      
+ k)                                                              
+                                                                 
+ residual_block_3 (Residual  (None, 16, 16, 128)       295936    
+ Block)                                                          
+                                                                 
+ residual_block_4 (Residual  (None, 16, 16, 128)       295936    
+ Block)                                                          
+                                                                 
+ residual_block_5 (Residual  (None, 8, 8, 256)         920576    
+ Block)                                                          
+                                                                 
+ double_axial_context_block  (None, 8, 8, 256)         165633    
+ _2 (DoubleAxialContextBloc                                      
+ k)                                                              
+                                                                 
+ residual_block_6 (Residual  (None, 8, 8, 256)         1181696   
+ Block)                                                          
+                                                                 
+ residual_block_7 (Residual  (None, 8, 8, 256)         1181696   
+ Block)                                                          
+                                                                 
+ double_axial_context_block  (None, 8, 8, 256)         165633    
+ _3 (DoubleAxialContextBloc                                      
+ k)                                                              
+                                                                 
+ residual_block_8 (Residual  (None, 8, 8, 256)         1181696   
+ Block)                                                          
+                                                                 
+ global_average_pooling2d (  (None, 256)               0         
+ GlobalAveragePooling2D)                                         
+                                                                 
+ dropout (Dropout)           (None, 256)               0         
+                                                                 
+ dense (Dense)               (None, 200)               51400     
+                                                                 
+=================================================================
+Total params: 5934540 (22.64 MB)
+Trainable params: 5925036 (22.60 MB)
+Non-trainable params: 9504 (37.12 KB)
+_________________________________________________________________

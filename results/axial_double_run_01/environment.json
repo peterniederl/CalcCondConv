@@ -1,0 +1,5 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.8.13 | packaged by conda-forge | (default, Mar 25 2022, 06:04:14) \n[Clang 12.0.1 ]",
+  "tensorflow": "2.13.0"
+}
