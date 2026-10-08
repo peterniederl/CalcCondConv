@@ -188,6 +188,206 @@ class CondConv2D(layers.Layer):
 
 
 @keras.utils.register_keras_serializable(package="CalcCondConv")
+class MaxMeanDynamicConv(layers.Layer):
+    """Standard convolution plus a per-sample MaxMean-selected depthwise kernel."""
+
+    def __init__(
+        self,
+        kernel_size=3,
+        strides=1,
+        initial_temperature=0.1,
+        initial_alpha=0.1,
+        padding="same",
+        use_bias=True,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.kernel_size = (
+            (kernel_size, kernel_size)
+            if isinstance(kernel_size, int)
+            else tuple(kernel_size)
+        )
+        if (
+            len(self.kernel_size) != 2
+            or any(size < 1 or size % 2 == 0 for size in self.kernel_size)
+        ):
+            raise ValueError("kernel_size must contain two positive odd values")
+        self.strides = (strides, strides) if isinstance(strides, int) else tuple(strides)
+        if len(self.strides) != 2 or any(stride < 1 for stride in self.strides):
+            raise ValueError(_STRIDES_ERROR)
+        self.padding = padding.lower()
+        if self.padding not in {"same", "valid"}:
+            raise ValueError("padding must be 'same' or 'valid'")
+        if initial_temperature <= 0:
+            raise ValueError("initial_temperature must be positive")
+        self.initial_temperature = float(initial_temperature)
+        self.initial_alpha = float(initial_alpha)
+        self.use_bias = use_bias
+        self.channels = None
+
+    def build(self, input_shape):
+        if len(input_shape) != 4 or input_shape[-1] is None:
+            raise ValueError("Input must have a known channels-last shape [B, H, W, C]")
+        self.channels = int(input_shape[-1])
+        kh, kw = self.kernel_size
+        self.kernel = self.add_weight(
+            name="kernel",
+            shape=(kh, kw, self.channels, self.channels),
+            initializer="glorot_uniform",
+            trainable=True,
+        )
+        self.bias = (
+            self.add_weight(
+                name="bias",
+                shape=(self.channels,),
+                initializer="zeros",
+                trainable=True,
+            )
+            if self.use_bias
+            else None
+        )
+        inverse_softplus = tf.math.log(tf.math.expm1(self.initial_temperature))
+        self.log_temperature = self.add_weight(
+            name="log_temperature",
+            shape=(),
+            initializer=keras.initializers.Constant(inverse_softplus),
+            trainable=True,
+        )
+        self.alpha = self.add_weight(
+            name="alpha",
+            shape=(),
+            initializer=keras.initializers.Constant(self.initial_alpha),
+            trainable=True,
+        )
+        super().build(input_shape)
+
+    def _extract_patches(self, inputs):
+        kh, kw = self.kernel_size
+        return tf.image.extract_patches(
+            images=inputs,
+            sizes=[1, kh, kw, 1],
+            strides=[1, self.strides[0], self.strides[1], 1],
+            rates=[1, 1, 1, 1],
+            padding=self.padding.upper(),
+        )
+
+    def call(self, inputs):
+        patches_flat = self._extract_patches(inputs)
+        batch_size = tf.shape(patches_flat)[0]
+        out_height = tf.shape(patches_flat)[1]
+        out_width = tf.shape(patches_flat)[2]
+        kh, kw = self.kernel_size
+        patch_area = kh * kw
+
+        # Work in float32 for the patch statistics, softmax, and normalization.
+        patches = tf.reshape(
+            tf.cast(patches_flat, tf.float32),
+            [batch_size, out_height, out_width, self.channels, patch_area],
+        )
+        patch_means = tf.reduce_mean(patches, axis=-1)
+        temperature = tf.nn.softplus(tf.cast(self.log_temperature, tf.float32)) + 1e-6
+        logits = tf.reshape(
+            patch_means / temperature,
+            [batch_size, out_height * out_width, self.channels],
+        )
+        weights = tf.nn.softmax(logits, axis=1)
+        weights = tf.reshape(
+            weights,
+            [batch_size, out_height, out_width, self.channels],
+        )
+        dynamic_kernel = tf.einsum("bhwc,bhwck->bck", weights, patches)
+        dynamic_kernel = tf.math.l2_normalize(dynamic_kernel, axis=-1, epsilon=1e-8)
+        dynamic_output = tf.einsum("bhwck,bck->bhwc", patches, dynamic_kernel)
+
+        regular_output = tf.nn.conv2d(
+            inputs,
+            tf.cast(self.kernel, inputs.dtype),
+            strides=[1, self.strides[0], self.strides[1], 1],
+            padding=self.padding.upper(),
+        )
+        outputs = regular_output + tf.cast(self.alpha, regular_output.dtype) * tf.cast(
+            dynamic_output, regular_output.dtype
+        )
+        if self.bias is not None:
+            outputs = tf.nn.bias_add(outputs, tf.cast(self.bias, outputs.dtype))
+        outputs.set_shape((inputs.shape[0], None, None, self.channels))
+        return outputs
+
+    def get_temperature(self):
+        return tf.nn.softplus(self.log_temperature)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "kernel_size": self.kernel_size,
+                "strides": self.strides,
+                "initial_temperature": self.initial_temperature,
+                "initial_alpha": self.initial_alpha,
+                "padding": self.padding,
+                "use_bias": self.use_bias,
+            }
+        )
+        return config
+
+
+@keras.utils.register_keras_serializable(package="CalcCondConv")
+class BottleneckConv2D(layers.Layer):
+    """Factorized convolution: 3x3 channel reduction followed by 1x1 expansion."""
+
+    def __init__(self, output_channels, reduction=4, strides=1, use_bias=False, **kwargs):
+        super().__init__(**kwargs)
+        if output_channels < 1 or reduction < 1:
+            raise ValueError("output_channels and reduction must be positive")
+        self.output_channels = output_channels
+        self.reduction = reduction
+        self.strides = (strides, strides) if isinstance(strides, int) else tuple(strides)
+        if len(self.strides) != 2 or any(stride < 1 for stride in self.strides):
+            raise ValueError(_STRIDES_ERROR)
+        self.use_bias = use_bias
+        self.input_channels = None
+        self.hidden_channels = None
+        self.spatial_conv = None
+        self.pointwise_conv = None
+
+    def build(self, input_shape):
+        input_channels = input_shape[-1]
+        if input_channels is None:
+            raise ValueError("BottleneckConv2D requires known input channels")
+        self.input_channels = int(input_channels)
+        self.hidden_channels = max(self.input_channels // self.reduction, 1)
+        self.spatial_conv = layers.Conv2D(
+            self.hidden_channels,
+            kernel_size=3,
+            strides=self.strides,
+            padding="same",
+            use_bias=self.use_bias,
+        )
+        self.pointwise_conv = layers.Conv2D(
+            self.output_channels,
+            kernel_size=1,
+            padding="same",
+            use_bias=self.use_bias,
+        )
+        super().build(input_shape)
+
+    def call(self, inputs):
+        return self.pointwise_conv(self.spatial_conv(inputs))
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "output_channels": self.output_channels,
+                "reduction": self.reduction,
+                "strides": self.strides,
+                "use_bias": self.use_bias,
+            }
+        )
+        return config
+
+
+@keras.utils.register_keras_serializable(package="CalcCondConv")
 class BasisConv2D(layers.Layer):
     """Convolution with reduced spatial-basis channels and a shared mixer."""
 
@@ -254,50 +454,64 @@ class BasisConv2D(layers.Layer):
 
 
 @keras.utils.register_keras_serializable(package="CalcCondConv")
-class DynamicBasisConv2D(BasisConv2D):
-    """BasisConv2D with input-dependent tanh weights over basis channels."""
+class DynamicBasisConv2D(layers.Layer):
+    """3x3 convolution followed by GELU and a 1x1 channel-mixing convolution."""
 
-    def __init__(self, channels, basis_factor=1, gate_reduction=4, strides=1, **kwargs):
-        if gate_reduction < 1:
-            raise ValueError("gate_reduction must be positive")
-        super().__init__(
-            channels=channels,
-            basis_factor=basis_factor,
-            strides=strides,
-            **kwargs,
-        )
-        self.gate_reduction = gate_reduction
-        hidden_channels = max(self.channels // gate_reduction, 8)
-        self.basis_gate = keras.Sequential(
-            [
-                layers.GlobalAveragePooling2D(),
-                layers.Dense(hidden_channels, activation="relu"),
-                layers.Dense(self.basis_channels, activation="sigmoid"),
-            ],
-            name="basis_gate",
+    def __init__(self, channels, basis_factor=1, strides=1, **kwargs):
+        super().__init__(**kwargs)
+
+        if channels < 1 or basis_factor < 1:
+            raise ValueError("channels and basis_factor must be positive")
+
+        if channels % basis_factor != 0:
+            raise ValueError("channels must be divisible by basis_factor")
+
+        self.channels = channels
+        self.basis_factor = basis_factor
+        self.basis_channels = channels // basis_factor
+
+        self.strides = (
+            (strides, strides)
+            if isinstance(strides, int)
+            else tuple(strides)
         )
 
-    def call(self, inputs):
-        gates = self.basis_gate(inputs)
-        # Linearity lets us apply the shared basis convolution first, then
-        # scale its basis-channel outputs per sample before the shared mixer.
-        spatial = tf.nn.conv2d(
-            inputs,
-            self.basis,
-            strides=[1, self.strides[0], self.strides[1], 1],
-            padding="SAME",
+        if len(self.strides) != 2 or any(stride < 1 for stride in self.strides):
+            raise ValueError(_STRIDES_ERROR)
+
+        self.conv3x3 = layers.Conv2D(
+            filters=self.basis_channels,
+            kernel_size=3,
+            strides=self.strides,
+            padding="same",
+            use_bias=True,
         )
-        gated_spatial = spatial * tf.cast(
-            gates[:, tf.newaxis, tf.newaxis, :], spatial.dtype
+
+        self.conv1x1 = layers.Conv2D(
+            filters=self.channels,
+            kernel_size=1,
+            strides=1,
+            padding="same",
+            use_bias=True,
         )
-        outputs = tf.einsum("bhwr,ro->bhwo", gated_spatial, self.mix)
-        outputs = tf.nn.bias_add(outputs, self.bias)
-        outputs.set_shape((inputs.shape[0], None, None, self.channels))
-        return outputs
+
+        self.gelu = layers.Activation("gelu")
+
+    def call(self, inputs, training=None):
+        x = self.conv3x3(inputs)
+        x = self.gelu(x)
+        x = self.conv1x1(x)
+        return x
 
     def get_config(self):
         config = super().get_config()
-        config.update({"gate_reduction": self.gate_reduction})
+        config.update(
+            {
+                "channels": self.channels,
+                "basis_factor": self.basis_factor,
+                "strides": self.strides,
+            }
+        )
         return config
 
 
@@ -578,6 +792,96 @@ class LowRankDynamicBasisDepthwiseConv(_DynamicDepthwiseBase):
 
 
 @keras.utils.register_keras_serializable(package="CalcCondConv")
+class AxialContextBlock(layers.Layer):
+    """Global axial context added to the input through a zero-initialized gamma."""
+
+    def __init__(
+        self,
+        reduction_factor=1,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        if reduction_factor < 1:
+            raise ValueError("reduction_factor must be >= 1")
+        self.reduction_factor = reduction_factor
+
+    def build(self, input_shape):
+        if len(input_shape) != 4 or None in tuple(input_shape[1:]):
+            raise ValueError("AxialContext requires a fully known [B, H, W, C] shape")
+        self.height = int(input_shape[1])
+        self.width = int(input_shape[2])
+        channels = int(input_shape[3])
+        if channels % self.reduction_factor:
+            raise ValueError(
+                f"channels ({channels}) must be divisible by "
+                f"reduction_factor ({self.reduction_factor})"
+            )
+        reduced_channels = channels // self.reduction_factor
+
+        self.pointwise_1 = layers.Conv2D(
+            reduced_channels, 1, padding="same", use_bias=False
+        )
+
+        self.pointwise_2 = layers.Conv2D(
+            channels, 1, padding="same", use_bias=False
+        )
+
+        self.vertical_1 = layers.Conv2D(
+            reduced_channels, (self.height, 1), padding="valid", use_bias=False
+        )
+        self.horizontal_1 = layers.Conv2D(
+            reduced_channels, (1, self.width), padding="valid", use_bias=False
+        )
+        self.vertical_2 = layers.Conv2D(
+            reduced_channels, (self.height, 1), padding="valid", use_bias=False
+        )
+        self.horizontal_2 = layers.Conv2D(
+            reduced_channels, (1, self.width), padding="valid", use_bias=False
+        )
+        self.bn1 = layers.BatchNormalization()
+        self.bn2 = layers.BatchNormalization()
+        self.bn3 = layers.BatchNormalization()
+        self.bn4 = layers.BatchNormalization()
+
+        self.gamma = self.add_weight(
+            name="gamma",
+            shape=(),
+            initializer=tf.keras.initializers.Constant(0.01),
+            trainable=True,
+        )
+        super().build(input_shape)
+
+    
+    def call(self, inputs, training=False):
+        shortcut = inputs
+        x = self.pointwise_1(inputs)
+        x = self.bn1(x, training=training)
+        x = tf.nn.relu(x)
+        v = self.vertical_1(x)
+        h = self.horizontal_1(x)
+        x = v + h
+        x = self.bn2(x, training=training)
+        x = tf.nn.relu(x)
+        v = self.vertical_2(x)
+        h = self.horizontal_2(x)
+        x = v + h
+        x = self.bn3(x, training=training)
+        x = tf.nn.relu(x)
+        x = self.pointwise_2(x)
+        x = self.bn4(x, training=training)
+        return tf.nn.relu(tf.cast(self.gamma, x.dtype) * x + shortcut)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "reduction_factor": self.reduction_factor,
+            }
+        )
+        return config
+
+
+@keras.utils.register_keras_serializable(package="CalcCondConv")
 class ResidualBlock(layers.Layer):
     """Basic residual block with a configurable 3x3 convolution operator."""
 
@@ -596,16 +900,26 @@ class ResidualBlock(layers.Layer):
         gate_reduction=4,
         mixer_reduction=4,
         mixer_rank=8,
+        maxmean_temperature=0.1,
+        maxmean_alpha=0.1,
+        axial_position="none",
+        axial_reduction=1,
+        axial_use_pointwise=False,
+        axial_use_tanh=False,
         **kwargs,
     ):
         super().__init__(**kwargs)
+        if axial_position not in {"none", "first", "second", "both"}:
+            raise ValueError("axial_position must be 'none', 'first', 'second', or 'both'")
         valid_types = {
             "standard",
             "grouped",
             "depthwise_separable",
+            "bottleneck_conv",
             "condconv",
             "basis_conv",
             "dynamic_basis_conv",
+            "maxmean_dynamic",
             "dynamic_mixer",
             "dynamic_depthwise",
             "dynamic_basis_depthwise",
@@ -634,6 +948,14 @@ class ResidualBlock(layers.Layer):
         self.gate_reduction = gate_reduction
         self.mixer_reduction = mixer_reduction
         self.mixer_rank = mixer_rank
+        self.maxmean_temperature = maxmean_temperature
+        self.maxmean_alpha = maxmean_alpha
+        self.axial_position = axial_position
+        self.axial_reduction = axial_reduction
+        self.axial_use_pointwise = axial_use_pointwise
+        self.axial_use_tanh = axial_use_tanh
+        self.axial1 = None
+        self.axial2 = None
         self.conv1 = None
         self.bn1 = layers.BatchNormalization()
         self.conv2 = None
@@ -668,6 +990,13 @@ class ResidualBlock(layers.Layer):
                     ),
                     layers.Conv2D(output_channels, 1, use_bias=False),
                 ]
+            )
+        if self.conv_type == "bottleneck_conv":
+            return BottleneckConv2D(
+                output_channels,
+                reduction=self.reduction,
+                strides=stride,
+                use_bias=False,
             )
         if self.conv_type == "condconv":
             return CondConv2D(
@@ -712,6 +1041,19 @@ class ResidualBlock(layers.Layer):
             return keras.Sequential(
                 [dynamic_mixer, layers.Conv2D(output_channels, 1, use_bias=False)]
             )
+        if self.conv_type == "maxmean_dynamic":
+            maxmean_conv = MaxMeanDynamicConv(
+                kernel_size=self.kernel_size,
+                strides=stride,
+                initial_temperature=self.maxmean_temperature,
+                initial_alpha=self.maxmean_alpha,
+                padding="same",
+            )
+            if input_channels == output_channels:
+                return maxmean_conv
+            return keras.Sequential(
+                [maxmean_conv, layers.Conv2D(output_channels, 1, use_bias=False)]
+            )
 
         dynamic_layers = {
             "dynamic_depthwise": DynamicDepthwiseConv,
@@ -733,12 +1075,23 @@ class ResidualBlock(layers.Layer):
             ]
         )
 
+    def _make_axial(self):
+        return AxialContext(
+            reduction_factor=self.axial_reduction,
+            use_pointwise=self.axial_use_pointwise,
+            use_tanh=self.axial_use_tanh,
+        )
+
     def build(self, input_shape):
         input_channels = input_shape[-1]
         if input_channels is None:
             raise ValueError("ResidualBlock requires a known input channel dimension")
         self.conv1 = self._make_conv(input_channels, self.filters, self.stride)
         self.conv2 = self._make_conv(self.filters, self.filters, 1)
+        if self.axial_position in {"first", "both"}:
+            self.axial1 = self._make_axial()
+        if self.axial_position in {"second", "both"}:
+            self.axial2 = self._make_axial()
 
         if self.stride != 1 or input_channels != self.filters:
             self.projection = keras.Sequential(
@@ -761,9 +1114,12 @@ class ResidualBlock(layers.Layer):
             if self.projection is None
             else self.projection(inputs, training=training)
         )
-        x = self.conv1(inputs)
+        x = inputs if self.axial1 is None else self.axial1(inputs)
+        x = self.conv1(x)
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
+        if self.axial2 is not None:
+            x = self.axial2(x)
         x = self.conv2(x)
         x = self.bn2(x, training=training)
         return tf.nn.relu(x + shortcut)
@@ -785,6 +1141,12 @@ class ResidualBlock(layers.Layer):
                 "gate_reduction": self.gate_reduction,
                 "mixer_reduction": self.mixer_reduction,
                 "mixer_rank": self.mixer_rank,
+                "maxmean_temperature": self.maxmean_temperature,
+                "maxmean_alpha": self.maxmean_alpha,
+                "axial_position": self.axial_position,
+                "axial_reduction": self.axial_reduction,
+                "axial_use_pointwise": self.axial_use_pointwise,
+                "axial_use_tanh": self.axial_use_tanh,
             }
         )
         return config
@@ -805,6 +1167,12 @@ def build_resnet(config):
     gate_reduction = model_config.get("gate_reduction", 4)
     mixer_reduction = model_config.get("mixer_reduction", 4)
     mixer_rank = model_config.get("mixer_rank", 8)
+    maxmean_temperature = model_config.get("maxmean_temperature", 0.1)
+    maxmean_alpha = model_config.get("maxmean_alpha", 0.1)
+    axial_position = model_config.get("axial_position", "none")
+    axial_reduction = model_config.get("axial_reduction", 1)
+    axial_use_pointwise = model_config.get("axial_use_pointwise", False)
+    axial_use_tanh = model_config.get("axial_use_tanh", True)
     stem_channels = model_config["stem_channels"]
     stage_channels = model_config["stage_channels"]
     stage_depths = model_config["stage_depths"]
@@ -819,7 +1187,11 @@ def build_resnet(config):
         zip(stage_channels, stage_depths)
     ):
         for block_index in range(depth):
+            if (block_index+1) % 2 == 0:
+                print(" > AxialContextBlock")
+                x = AxialContextBlock(reduction_factor=4)(x)
             stride = 2 if stage_index > 0 and block_index == 0 else 1
+            print(" > ResidualBlock")
             x = ResidualBlock(
                 channels,
                 stride=stride,
@@ -834,6 +1206,12 @@ def build_resnet(config):
                 gate_reduction=gate_reduction,
                 mixer_reduction=mixer_reduction,
                 mixer_rank=mixer_rank,
+                maxmean_temperature=maxmean_temperature,
+                maxmean_alpha=maxmean_alpha,
+                axial_position=axial_position,
+                axial_reduction=axial_reduction,
+                axial_use_pointwise=axial_use_pointwise,
+                axial_use_tanh=axial_use_tanh,
             )(x)
 
     x = layers.GlobalAveragePooling2D()(x)

@@ -7,16 +7,31 @@ python3 compare_histories.py \
 
 
 python3 compare_histories.py \
-  baseline_run_01 \
-  baseline_run_02 \
-  dynamic_basis_depthwise_run_00 \
-  dynamic_basis_depthwise_low_rank_run_01 \
-  dynamic_depthwise_run_01 \
-  basis_conv_run_01 \
-  dynamic_mixer_run_01 \
+  standard_run_01 \
+  standard_run_02 \
+  standard_run_04 \
+  se_run_01 \
+  se_run_02 \
   --metric val_accuracy \
   --output results/history_comparison.png
 
   python3 run_experiments.py \
   --models basis_conv \
   --runs basis_conv=1 
+  --basis-factor
+
+python3 run_experiments.py \
+  --models standard \
+  --runs standard=1 \
+  --axial-position=first 
+
+python3 run_experiments.py \
+  --models standard \
+  --runs standard=3 
+
+
+
+  python3 run_experiments.py \
+  --models standard standard\
+  --runs standard=1 standard=1\
+  --axial-position=first --axial-position=both

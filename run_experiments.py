@@ -15,9 +15,11 @@ MODEL_CONVOLUTION = {
     "standard": "standard",
     "grouped": "grouped",
     "depthwise_separable": "depthwise_separable",
+    "bottleneck_conv": "bottleneck_conv",
     "condconv": "condconv",
     "basis_conv": "basis_conv",
     "dynamic_basis_conv": "dynamic_basis_conv",
+    "maxmean_dynamic": "maxmean_dynamic",
     "dynamic_mixer": "dynamic_mixer",
     "dynamic_depthwise": "dynamic_depthwise",
     "dynamic_basis_depthwise": "dynamic_basis_depthwise",
@@ -42,6 +44,12 @@ class ConfiguredExperiment(ResNetExperiment):
         gate_reduction,
         mixer_reduction,
         mixer_rank,
+        maxmean_temperature,
+        maxmean_alpha,
+        axial_position,
+        axial_reduction,
+        axial_use_pointwise,
+        axial_use_tanh,
     ):
         self.run_name = run_name
         self.conv_type = conv_type
@@ -57,6 +65,12 @@ class ConfiguredExperiment(ResNetExperiment):
         self.gate_reduction = gate_reduction
         self.mixer_reduction = mixer_reduction
         self.mixer_rank = mixer_rank
+        self.maxmean_temperature = maxmean_temperature
+        self.maxmean_alpha = maxmean_alpha
+        self.axial_position = axial_position
+        self.axial_reduction = axial_reduction
+        self.axial_use_pointwise = axial_use_pointwise
+        self.axial_use_tanh = axial_use_tanh
 
     def config(self):
         config = ExperimentConfig(
@@ -75,6 +89,12 @@ class ConfiguredExperiment(ResNetExperiment):
         config.model["gate_reduction"] = self.gate_reduction
         config.model["mixer_reduction"] = self.mixer_reduction
         config.model["mixer_rank"] = self.mixer_rank
+        config.model["maxmean_temperature"] = self.maxmean_temperature
+        config.model["maxmean_alpha"] = self.maxmean_alpha
+        config.model["axial_position"] = self.axial_position
+        config.model["axial_reduction"] = self.axial_reduction
+        config.model["axial_use_pointwise"] = self.axial_use_pointwise
+        config.model["axial_use_tanh"] = self.axial_use_tanh
         return config
 
 
@@ -164,6 +184,12 @@ def run_experiments(
     gate_reduction=4,
     mixer_reduction=4,
     mixer_rank=8,
+    maxmean_temperature=0.1,
+    maxmean_alpha=0.1,
+    axial_position="none",
+    axial_reduction=1,
+    axial_use_pointwise=False,
+    axial_use_tanh=False,
 ):
     records = []
     for model_name in model_names:
@@ -187,6 +213,12 @@ def run_experiments(
                 gate_reduction=gate_reduction,
                 mixer_reduction=mixer_reduction,
                 mixer_rank=mixer_rank,
+                maxmean_temperature=maxmean_temperature,
+                maxmean_alpha=maxmean_alpha,
+                axial_position=axial_position,
+                axial_reduction=axial_reduction,
+                axial_use_pointwise=axial_use_pointwise,
+                axial_use_tanh=axial_use_tanh,
             )
             experiment.run()
             records.append(_read_result(results_dir, model_name, run_number, seed))
@@ -294,6 +326,30 @@ def parse_args():
         "--mixer-rank", type=int, default=8,
         help="Low-rank channel mixer rank for dynamic_mixer (default: 8).",
     )
+    parser.add_argument(
+        "--maxmean-temperature", type=float, default=0.1,
+        help="Initial positive temperature for maxmean_dynamic (default: 0.1).",
+    )
+    parser.add_argument(
+        "--maxmean-alpha", type=float, default=0.1,
+        help="Initial strength of the MaxMean dynamic branch (default: 0.1).",
+    )
+    parser.add_argument(
+        "--axial-position", choices=["none", "first", "second", "both"], default="none",
+        help="Insert AxialContext before the first and/or second convolution of each residual block (default: none).",
+    )
+    parser.add_argument(
+        "--axial-reduction", type=int, default=1,
+        help="Channel reduction factor inside AxialContext; needs --axial-pointwise when > 1 (default: 1).",
+    )
+    parser.add_argument(
+        "--axial-pointwise", action="store_true",
+        help="Apply a 1x1 projection before the axial convolutions.",
+    )
+    parser.add_argument(
+        "--axial-tanh", action="store_true",
+        help="Apply tanh to the concatenated axial context.",
+    )
     parser.add_argument("--results-dir", default="results", help="Directory for run outputs.")
     return parser.parse_args()
 
@@ -315,10 +371,14 @@ def main():
         or args.gate_reduction < 1
         or args.mixer_reduction < 1
         or args.mixer_rank < 1
+        or args.maxmean_temperature <= 0
+        or args.axial_reduction < 1
     ):
         raise SystemExit(
-            "error: --groups, --num-bases, --reduction, --coefficient-rank, --kernel-size, --num-experts, --basis-factor, --gate-reduction, --mixer-reduction, and --mixer-rank must be positive"
+            "error: --groups, --num-bases, --reduction, --coefficient-rank, --kernel-size, --num-experts, --basis-factor, --gate-reduction, --mixer-reduction, --mixer-rank, --maxmean-temperature, and --axial-reduction must be positive"
         )
+    if args.axial_reduction > 1 and not args.axial_pointwise:
+        raise SystemExit("error: --axial-reduction > 1 requires --axial-pointwise")
     if "grouped" in args.models and args.groups < 2:
         raise SystemExit("error: --groups must be at least 2 when selecting grouped")
     records = run_experiments(
@@ -336,6 +396,12 @@ def main():
         gate_reduction=args.gate_reduction,
         mixer_reduction=args.mixer_reduction,
         mixer_rank=args.mixer_rank,
+        maxmean_temperature=args.maxmean_temperature,
+        maxmean_alpha=args.maxmean_alpha,
+        axial_position=args.axial_position,
+        axial_reduction=args.axial_reduction,
+        axial_use_pointwise=args.axial_pointwise,
+        axial_use_tanh=args.axial_tanh,
     )
     print(f"\nCompleted {len(records)} runs.")
     print(f"Comparison written to {Path(args.results_dir) / 'comparison.csv'}")
