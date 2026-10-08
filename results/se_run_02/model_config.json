@@ -1,0 +1,611 @@
+{
+  "backend": "tensorflow",
+  "class_name": "Functional",
+  "config": {
+    "input_layers": [
+      [
+        "input_1",
+        0,
+        0
+      ]
+    ],
+    "layers": [
+      {
+        "class_name": "InputLayer",
+        "config": {
+          "batch_input_shape": [
+            null,
+            64,
+            64,
+            3
+          ],
+          "dtype": "float32",
+          "name": "input_1",
+          "ragged": false,
+          "sparse": false
+        },
+        "inbound_nodes": [],
+        "module": "keras.layers",
+        "name": "input_1",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            64,
+            64,
+            3
+          ]
+        },
+        "class_name": "Conv2D",
+        "config": {
+          "activation": "linear",
+          "activity_regularizer": null,
+          "bias_constraint": null,
+          "bias_initializer": {
+            "class_name": "Zeros",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "bias_regularizer": null,
+          "data_format": "channels_last",
+          "dilation_rate": [
+            1,
+            1
+          ],
+          "dtype": "float32",
+          "filters": 64,
+          "groups": 1,
+          "kernel_constraint": null,
+          "kernel_initializer": {
+            "class_name": "GlorotUniform",
+            "config": {
+              "seed": null
+            },
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "kernel_regularizer": null,
+          "kernel_size": [
+            5,
+            5
+          ],
+          "name": "conv2d",
+          "padding": "same",
+          "strides": [
+            2,
+            2
+          ],
+          "trainable": true,
+          "use_bias": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "input_1",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "conv2d",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "BatchNormalization",
+        "config": {
+          "axis": [
+            3
+          ],
+          "beta_constraint": null,
+          "beta_initializer": {
+            "class_name": "Zeros",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "beta_regularizer": null,
+          "center": true,
+          "dtype": "float32",
+          "epsilon": 0.001,
+          "gamma_constraint": null,
+          "gamma_initializer": {
+            "class_name": "Ones",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "gamma_regularizer": null,
+          "momentum": 0.99,
+          "moving_mean_initializer": {
+            "class_name": "Zeros",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "moving_variance_initializer": {
+            "class_name": "Ones",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "name": "batch_normalization",
+          "scale": true,
+          "trainable": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "conv2d",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "batch_normalization",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "Activation",
+        "config": {
+          "activation": "relu",
+          "dtype": "float32",
+          "name": "activation",
+          "trainable": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "batch_normalization",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "activation",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 64,
+          "name": "residual_block",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "activation",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 64,
+          "name": "residual_block_1",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_1",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 128,
+          "name": "residual_block_2",
+          "stride": 2,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_1",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_2",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            16,
+            16,
+            128
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 128,
+          "name": "residual_block_3",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_2",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_3",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            16,
+            16,
+            128
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 128,
+          "name": "residual_block_4",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_3",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_4",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            16,
+            16,
+            128
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 256,
+          "name": "residual_block_5",
+          "stride": 2,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_4",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_5",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            8,
+            8,
+            256
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 256,
+          "name": "residual_block_6",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_5",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_6",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            8,
+            8,
+            256
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 256,
+          "name": "residual_block_7",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_6",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_7",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            8,
+            8,
+            256
+          ]
+        },
+        "class_name": "ResidualBlock",
+        "config": {
+          "attention": "se",
+          "dtype": "float32",
+          "filters": 256,
+          "name": "residual_block_8",
+          "stride": 1,
+          "trainable": true,
+          "use_post_block": false
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_7",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block_8",
+        "registered_name": "ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            8,
+            8,
+            256
+          ]
+        },
+        "class_name": "GlobalAveragePooling2D",
+        "config": {
+          "data_format": "channels_last",
+          "dtype": "float32",
+          "keepdims": false,
+          "name": "global_average_pooling2d",
+          "trainable": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block_8",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "global_average_pooling2d",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            256
+          ]
+        },
+        "class_name": "Dropout",
+        "config": {
+          "dtype": "float32",
+          "name": "dropout",
+          "noise_shape": null,
+          "rate": 0.3,
+          "seed": null,
+          "trainable": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "global_average_pooling2d",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "dropout",
+        "registered_name": null
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            256
+          ]
+        },
+        "class_name": "Dense",
+        "config": {
+          "activation": "linear",
+          "activity_regularizer": null,
+          "bias_constraint": null,
+          "bias_initializer": {
+            "class_name": "Zeros",
+            "config": {},
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "bias_regularizer": null,
+          "dtype": "float32",
+          "kernel_constraint": null,
+          "kernel_initializer": {
+            "class_name": "GlorotUniform",
+            "config": {
+              "seed": null
+            },
+            "module": "keras.initializers",
+            "registered_name": null
+          },
+          "kernel_regularizer": null,
+          "name": "dense",
+          "trainable": true,
+          "units": 200,
+          "use_bias": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "dropout",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "keras.layers",
+        "name": "dense",
+        "registered_name": null
+      }
+    ],
+    "name": "resnet_se",
+    "output_layers": [
+      [
+        "dense",
+        0,
+        0
+      ]
+    ],
+    "trainable": true
+  },
+  "keras_version": "2.13.1"
+}
