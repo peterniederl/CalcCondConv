@@ -198,17 +198,50 @@
             64
           ]
         },
-        "class_name": "SingleAxialContextBlock",
+        "class_name": "ResidualBlock",
         "config": {
+          "conv_type": "standard",
           "dtype": "float32",
-          "name": "single_axial_context_block",
-          "reduction_factor": 1,
+          "filters": 64,
+          "groups": 2,
+          "name": "residual_block",
+          "stride": 1,
           "trainable": true
         },
         "inbound_nodes": [
           [
             [
               "activation",
+              0,
+              0,
+              {}
+            ]
+          ]
+        ],
+        "module": "model_factory",
+        "name": "residual_block",
+        "registered_name": "ResNet>ResidualBlock"
+      },
+      {
+        "build_config": {
+          "input_shape": [
+            null,
+            32,
+            32,
+            64
+          ]
+        },
+        "class_name": "SingleAxialContextBlock",
+        "config": {
+          "dtype": "float32",
+          "name": "single_axial_context_block",
+          "reduction_factor": 4,
+          "trainable": true
+        },
+        "inbound_nodes": [
+          [
+            [
+              "residual_block",
               0,
               0,
               {}
@@ -234,7 +267,7 @@
           "dtype": "float32",
           "filters": 64,
           "groups": 2,
-          "name": "residual_block",
+          "name": "residual_block_1",
           "stride": 1,
           "trainable": true
         },
@@ -249,101 +282,8 @@
           ]
         ],
         "module": "model_factory",
-        "name": "residual_block",
-        "registered_name": "ResNet>ResidualBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            32,
-            32,
-            64
-          ]
-        },
-        "class_name": "SingleAxialContextBlock",
-        "config": {
-          "dtype": "float32",
-          "name": "single_axial_context_block_1",
-          "reduction_factor": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "residual_block",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
-        "name": "single_axial_context_block_1",
-        "registered_name": "ResNet>SingleAxialContextBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            32,
-            32,
-            64
-          ]
-        },
-        "class_name": "ResidualBlock",
-        "config": {
-          "conv_type": "standard",
-          "dtype": "float32",
-          "filters": 64,
-          "groups": 2,
-          "name": "residual_block_1",
-          "stride": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "single_axial_context_block_1",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
         "name": "residual_block_1",
         "registered_name": "ResNet>ResidualBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            32,
-            32,
-            64
-          ]
-        },
-        "class_name": "SingleAxialContextBlock",
-        "config": {
-          "dtype": "float32",
-          "name": "single_axial_context_block_2",
-          "reduction_factor": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "residual_block_1",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
-        "name": "single_axial_context_block_2",
-        "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
         "build_config": {
@@ -367,7 +307,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_2",
+              "residual_block_1",
               0,
               0,
               {}
@@ -390,8 +330,8 @@
         "class_name": "SingleAxialContextBlock",
         "config": {
           "dtype": "float32",
-          "name": "single_axial_context_block_3",
-          "reduction_factor": 1,
+          "name": "single_axial_context_block_1",
+          "reduction_factor": 4,
           "trainable": true
         },
         "inbound_nodes": [
@@ -405,7 +345,7 @@
           ]
         ],
         "module": "model_factory",
-        "name": "single_axial_context_block_3",
+        "name": "single_axial_context_block_1",
         "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
@@ -430,7 +370,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_3",
+              "single_axial_context_block_1",
               0,
               0,
               {}
@@ -440,36 +380,6 @@
         "module": "model_factory",
         "name": "residual_block_3",
         "registered_name": "ResNet>ResidualBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            16,
-            16,
-            128
-          ]
-        },
-        "class_name": "SingleAxialContextBlock",
-        "config": {
-          "dtype": "float32",
-          "name": "single_axial_context_block_4",
-          "reduction_factor": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "residual_block_3",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
-        "name": "single_axial_context_block_4",
-        "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
         "build_config": {
@@ -493,7 +403,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_4",
+              "residual_block_3",
               0,
               0,
               {}
@@ -503,36 +413,6 @@
         "module": "model_factory",
         "name": "residual_block_4",
         "registered_name": "ResNet>ResidualBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            16,
-            16,
-            128
-          ]
-        },
-        "class_name": "SingleAxialContextBlock",
-        "config": {
-          "dtype": "float32",
-          "name": "single_axial_context_block_5",
-          "reduction_factor": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "residual_block_4",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
-        "name": "single_axial_context_block_5",
-        "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
         "build_config": {
@@ -556,7 +436,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_5",
+              "residual_block_4",
               0,
               0,
               {}
@@ -579,8 +459,8 @@
         "class_name": "SingleAxialContextBlock",
         "config": {
           "dtype": "float32",
-          "name": "single_axial_context_block_6",
-          "reduction_factor": 1,
+          "name": "single_axial_context_block_2",
+          "reduction_factor": 4,
           "trainable": true
         },
         "inbound_nodes": [
@@ -594,7 +474,7 @@
           ]
         ],
         "module": "model_factory",
-        "name": "single_axial_context_block_6",
+        "name": "single_axial_context_block_2",
         "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
@@ -619,7 +499,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_6",
+              "single_axial_context_block_2",
               0,
               0,
               {}
@@ -629,36 +509,6 @@
         "module": "model_factory",
         "name": "residual_block_6",
         "registered_name": "ResNet>ResidualBlock"
-      },
-      {
-        "build_config": {
-          "input_shape": [
-            null,
-            8,
-            8,
-            256
-          ]
-        },
-        "class_name": "SingleAxialContextBlock",
-        "config": {
-          "dtype": "float32",
-          "name": "single_axial_context_block_7",
-          "reduction_factor": 1,
-          "trainable": true
-        },
-        "inbound_nodes": [
-          [
-            [
-              "residual_block_6",
-              0,
-              0,
-              {}
-            ]
-          ]
-        ],
-        "module": "model_factory",
-        "name": "single_axial_context_block_7",
-        "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
         "build_config": {
@@ -682,7 +532,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_7",
+              "residual_block_6",
               0,
               0,
               {}
@@ -705,8 +555,8 @@
         "class_name": "SingleAxialContextBlock",
         "config": {
           "dtype": "float32",
-          "name": "single_axial_context_block_8",
-          "reduction_factor": 1,
+          "name": "single_axial_context_block_3",
+          "reduction_factor": 4,
           "trainable": true
         },
         "inbound_nodes": [
@@ -720,7 +570,7 @@
           ]
         ],
         "module": "model_factory",
-        "name": "single_axial_context_block_8",
+        "name": "single_axial_context_block_3",
         "registered_name": "ResNet>SingleAxialContextBlock"
       },
       {
@@ -745,7 +595,7 @@
         "inbound_nodes": [
           [
             [
-              "single_axial_context_block_8",
+              "single_axial_context_block_3",
               0,
               0,
               {}

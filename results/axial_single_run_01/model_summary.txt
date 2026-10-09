@@ -11,63 +11,43 @@ _________________________________________________________________
                                                                  
  activation (Activation)     (None, 32, 32, 64)        0         
                                                                  
- single_axial_context_block  (None, 32, 32, 64)        271105    
-  (SingleAxialContextBlock)                                      
-                                                                 
  residual_block (ResidualBl  (None, 32, 32, 64)        74240     
  ock)                                                            
                                                                  
- single_axial_context_block  (None, 32, 32, 64)        271105    
- _1 (SingleAxialContextBloc                                      
- k)                                                              
+ single_axial_context_block  (None, 32, 32, 64)        18817     
+  (SingleAxialContextBlock)                                      
                                                                  
  residual_block_1 (Residual  (None, 32, 32, 64)        74240     
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 32, 32, 64)        271105    
- _2 (SingleAxialContextBloc                                      
- k)                                                              
-                                                                 
  residual_block_2 (Residual  (None, 16, 16, 128)       230912    
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 16, 16, 128)       558593    
- _3 (SingleAxialContextBloc                                      
+ single_axial_context_block  (None, 16, 16, 128)       41729     
+ _1 (SingleAxialContextBloc                                      
  k)                                                              
                                                                  
  residual_block_3 (Residual  (None, 16, 16, 128)       295936    
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 16, 16, 128)       558593    
- _4 (SingleAxialContextBloc                                      
- k)                                                              
-                                                                 
  residual_block_4 (Residual  (None, 16, 16, 128)       295936    
  Block)                                                          
-                                                                 
- single_axial_context_block  (None, 16, 16, 128)       558593    
- _5 (SingleAxialContextBloc                                      
- k)                                                              
                                                                  
  residual_block_5 (Residual  (None, 8, 8, 256)         920576    
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 8, 8, 256)         1182721   
- _6 (SingleAxialContextBloc                                      
+ single_axial_context_block  (None, 8, 8, 256)         99841     
+ _2 (SingleAxialContextBloc                                      
  k)                                                              
                                                                  
  residual_block_6 (Residual  (None, 8, 8, 256)         1181696   
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 8, 8, 256)         1182721   
- _7 (SingleAxialContextBloc                                      
- k)                                                              
-                                                                 
  residual_block_7 (Residual  (None, 8, 8, 256)         1181696   
  Block)                                                          
                                                                  
- single_axial_context_block  (None, 8, 8, 256)         1182721   
- _8 (SingleAxialContextBloc                                      
+ single_axial_context_block  (None, 8, 8, 256)         99841     
+ _3 (SingleAxialContextBloc                                      
  k)                                                              
                                                                  
  residual_block_8 (Residual  (None, 8, 8, 256)         1181696   
@@ -81,7 +61,7 @@ _________________________________________________________________
  dense (Dense)               (None, 200)               51400     
                                                                  
 =================================================================
-Total params: 11530641 (43.99 MB)
-Trainable params: 11515537 (43.93 MB)
-Non-trainable params: 15104 (59.00 KB)
+Total params: 5753612 (21.95 MB)
+Trainable params: 5744460 (21.91 MB)
+Non-trainable params: 9152 (35.75 KB)
 _________________________________________________________________
