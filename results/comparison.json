@@ -1,26 +1,14 @@
 [
   {
-    "model": "axial_double",
+    "model": "axial_grouped",
     "run": 1,
     "seed": 42,
-    "run_name": "axial_double_run_01",
-    "best_val_accuracy": 0.6136999726295471,
-    "best_val_loss": 1.7149349451065063,
-    "final_val_accuracy": 0.6123999953269958,
-    "final_val_loss": 1.7105563879013062,
-    "evaluation_accuracy": 0.6123999953269958,
-    "evaluation_loss": 1.7105563879013062
-  },
-  {
-    "model": "axial_single",
-    "run": 1,
-    "seed": 42,
-    "run_name": "axial_single_run_01",
-    "best_val_accuracy": 0.6054999828338623,
-    "best_val_loss": 1.7575894594192505,
-    "final_val_accuracy": 0.6046000123023987,
-    "final_val_loss": 1.7579710483551025,
-    "evaluation_accuracy": 0.6046000123023987,
-    "evaluation_loss": 1.7579710483551025
+    "run_name": "axial_grouped_run_01",
+    "best_val_accuracy": 0.6097000241279602,
+    "best_val_loss": 1.7453988790512085,
+    "final_val_accuracy": 0.6090999841690063,
+    "final_val_loss": 1.7414394617080688,
+    "evaluation_accuracy": 0.6090999841690063,
+    "evaluation_loss": 1.7414394617080688
   }
 ]
